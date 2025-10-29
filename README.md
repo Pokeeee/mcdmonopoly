@@ -9,14 +9,6 @@ _A Tampermonkey userscript that automates McDonald’s Monopoly (“PlayAtMCD”
 
 ---
 
-## 📸 Preview
-
-| Gmail Button | Auto Verify in Action |
-|---------------|----------------------|
-| ![Gmail Button Screenshot](https://via.placeholder.com/400x220?text=Auto-Verify+Button+in+Gmail) | ![Verification Screenshot](https://via.placeholder.com/400x220?text=OTP+Auto-Filled+and+Submitted) |
-
----
-
 ## ✨ Overview
 
 This userscript bridges **Gmail** and **PlayAtMCD** by automatically opening verification links and completing OTP verification for you.
