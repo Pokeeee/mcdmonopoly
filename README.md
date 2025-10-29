@@ -9,3 +9,4 @@ then you autofill your information yourself and submit
 it can open all 5 links at once
 
 100% vibecoded so it might not work...
+<img width="1509" height="774" alt="image" src="https://github.com/user-attachments/assets/6116f1fb-43c4-4bba-97df-25a8c5970bbb" />
