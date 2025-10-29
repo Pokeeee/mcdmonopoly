@@ -38,7 +38,9 @@ When installed in **Tampermonkey**, the script:
 ## ⚠️ Disclaimer
 
 ⚠️ Use responsibly — automating interactions may violate third-party terms of service.
+
 🧪 For educational or research purposes only.
+
 💥 “100% vibecoded” — quick-and-dirty automation; expect minor quirks.
 
 ---
