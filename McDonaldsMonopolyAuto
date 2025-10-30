@@ -1,0 +1,215 @@
+// ==UserScript==
+// @name         PlayAtMCD + Gmail Auto-Verify + Autofill
+// @namespace    https://example.local/
+// @version      2.0
+// @description  Combines Gmail auto-verify, PlayAtMCD OTP, landing autofill, checkboxes, and captcha focus
+// @match        https://mail.google.com/*
+// @match        https://amoe.playatmcd.com/*
+// @grant        GM_openInTab
+// @run-at       document-idle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+    /**********************
+     * Gmail Auto-Verify
+     **********************/
+    if (location.hostname === 'mail.google.com') {
+        const BUTTON_ID = 'autoVerifyPersistentBtn';
+        const OPEN_IN_BACKGROUND = true;
+        const MAX_OPEN = 20;
+
+        async function expandCollapsedParts(timeoutMs=8000){
+            const t0=Date.now(); const bodies=()=>document.querySelectorAll('div.a3s').length; let before=bodies();
+            const clickAll=(l)=>l.forEach(e=>{try{e.click();}catch{}});
+            clickAll(document.querySelectorAll('span.aQJ,span.ajR,[aria-label*="Show trimmed"],[data-tooltip*="Show trimmed"]'));
+            clickAll(document.querySelectorAll('a[href*="view=om"]'));
+            clickAll(document.querySelectorAll('div[role="button"][aria-label*="Expand"],[aria-label*="Expand all"]'));
+            while(Date.now()-t0<timeoutMs){
+                await sleep(300);
+                const after=bodies();
+                if(after>before) break;
+            }
+        }
+
+        function findSixDigitCode(container) {
+            if (!container) return null;
+            const text = container.innerText || '';
+            const m = text.match(/\b\d{6}\b/);
+            return m ? m[0] : null;
+        }
+
+        async function openVerificationLinks() {
+            await expandCollapsedParts();
+            await sleep(400);
+            const anchors = [...document.querySelectorAll('div.a3s a')];
+            const verifyLinks = anchors.filter(a => a.href && a.href.startsWith('https://amoe.playatmcd.com/verify_your_email'));
+            if (!verifyLinks.length) { alert('No verification links found in this email.'); return; }
+
+            let opened = 0;
+            for (const a of verifyLinks) {
+                if (opened >= MAX_OPEN) break;
+                const container = a.closest('div.a3s') || document.body;
+                const code = findSixDigitCode(container);
+                const url = code ? `${a.href}#${code}` : a.href;
+                try { GM_openInTab(url, { active: !OPEN_IN_BACKGROUND }); } catch { window.open(url, '_blank'); }
+                opened++;
+            }
+            alert(`Opened ${opened} link(s) with codes appended.`);
+        }
+
+        function injectGmailButton() {
+            if (document.getElementById(BUTTON_ID)) return;
+            const btn = document.createElement('button');
+            btn.id = BUTTON_ID;
+            btn.innerText = 'Auto-Verify Links';
+            Object.assign(btn.style, {
+                position: 'fixed',
+                bottom: '20px',
+                right: '20px',
+                zIndex: '2147483647',
+                padding: '10px 15px',
+                fontSize: '14px',
+                borderRadius: '6px',
+                border: '1px solid rgba(0,0,0,0.2)',
+                backgroundColor: '#fff',
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+            });
+            btn.addEventListener('click', openVerificationLinks);
+            document.body.appendChild(btn);
+        }
+
+        const gmailObserver = new MutationObserver(() => { if (document.querySelector('div.a3s')) injectGmailButton(); });
+        gmailObserver.observe(document.body, { childList: true, subtree: true });
+        injectGmailButton();
+        return;
+    }
+
+    /**********************
+     * PlayAtMCD Landing Page Autofill + Checkboxes
+     **********************/
+    if (location.hostname === 'amoe.playatmcd.com') {
+        const STORAGE_KEY_EMAIL = 'pamcd_landing_email';
+
+        function setInputValue(el, val) {
+            if (!el) return false;
+            el.value = val;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            return true;
+        }
+
+        function getSavedEmail() {
+            let email = localStorage.getItem(STORAGE_KEY_EMAIL) || '';
+            if (!email) {
+                email = prompt('Enter your email for PlayAtMCD (will be saved locally):','') || '';
+                if (email) localStorage.setItem(STORAGE_KEY_EMAIL, email);
+            }
+            return email.trim();
+        }
+
+        function findEmailInput() {
+            return document.querySelector('input[type="email"], input[name*="email"], input[placeholder*="email"]');
+        }
+
+        function checkAllCheckboxes() {
+            const checkboxes = [...document.querySelectorAll('input[type="checkbox"]')];
+            checkboxes.forEach(cb => {
+                if (!cb.checked && cb.offsetWidth > 0 && cb.offsetHeight > 0 && window.getComputedStyle(cb).visibility !== 'hidden') {
+                    cb.checked = true;
+                    cb.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        function clickRecaptcha() {
+            const iframes = [...document.querySelectorAll('iframe')];
+            const captchaFrame = iframes.find(f =>
+                (f.src || '').toLowerCase().includes('recaptcha') ||
+                (f.title || '').toLowerCase().includes('recaptcha')
+            );
+            if (!captchaFrame) return false;
+            try {
+                captchaFrame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                captchaFrame.click();
+                console.log('Attempted reCAPTCHA checkbox click.');
+                return true;
+            } catch (e) { console.log('Failed to click reCAPTCHA automatically:', e); return false; }
+        }
+
+        function focusCaptcha() {
+            const iframes = [...document.querySelectorAll('iframe')];
+            const captchaFrame = iframes.find(f =>
+                (f.src || '').toLowerCase().includes('recaptcha') ||
+                (f.title || '').toLowerCase().includes('recaptcha') ||
+                (f.src || '').toLowerCase().includes('hcaptcha') ||
+                (f.title || '').toLowerCase().includes('hcaptcha')
+            );
+            if (captchaFrame) {
+                captchaFrame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                captchaFrame.focus();
+                console.log('Captcha focused for manual solve.');
+            }
+        }
+
+        function mainAutofill() {
+            const email = getSavedEmail();
+            if (email) { const emailInput = findEmailInput(); if (emailInput) setInputValue(emailInput, email); }
+            checkAllCheckboxes();
+            const clicked = clickRecaptcha();
+            if (!clicked) focusCaptcha();
+        }
+
+        // ---------- Verification Page OTP Handling ----------
+        function pasteOTP() {
+            const code = (location.hash || '').replace('#','').trim();
+            if (!/^\d{6}$/.test(code)) return false;
+            const input = document.getElementById('otp');
+            if (!input) return false;
+            const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+            nativeSetter.call(input, code);
+            input.dispatchEvent(new Event('input',{bubbles:true}));
+            input.dispatchEvent(new Event('change',{bubbles:true}));
+            input.dispatchEvent(new Event('blur',{bubbles:true}));
+            console.log('OTP pasted:', code);
+            return true;
+        }
+
+        function clickVerify() {
+            const btn = document.querySelector('#verifyemail_btn button[type="submit"]');
+            if (btn) { setTimeout(()=>btn.click(),150); console.log('Verify & Continue clicked'); return true; }
+            return false;
+        }
+
+        function handleAutoFlow() { if (pasteOTP()) clickVerify(); }
+
+        const btnManual = document.createElement('button');
+        btnManual.innerText = 'Paste OTP';
+        Object.assign(btnManual.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: '99999',
+            padding: '10px 15px',
+            fontSize: '14px',
+            borderRadius: '6px',
+            border: '1px solid rgba(0,0,0,0.2)',
+            backgroundColor: '#4CAF50',
+            color: '#fff',
+            cursor: 'pointer',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+        });
+        btnManual.addEventListener('click', handleAutoFlow);
+        document.body.appendChild(btnManual);
+
+        const observer = new MutationObserver(() => { if(document.querySelector('#verifyemail_btn button[type="submit"]')) { handleAutoFlow(); observer.disconnect(); } });
+        observer.observe(document.body, { childList:true, subtree:true });
+
+        window.addEventListener('load', ()=>setTimeout(()=>{ mainAutofill(); handleAutoFlow(); }, 300));
+    }
+
+})();
