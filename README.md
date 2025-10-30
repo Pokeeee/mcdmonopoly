@@ -1,51 +1,71 @@
-# 📨 Gmail + PlayAtMCD Full Auto-Verify  
+# PlayAtMCD + Gmail Auto-Verify Userscript
 
-_A Tampermonkey userscript that automates McDonald’s Monopoly (“PlayAtMCD”) email verification links and OTP entry._
-
-![License](https://img.shields.io/badge/license-MIT-green)
-![Tampermonkey](https://img.shields.io/badge/Userscript-Tampermonkey-blue)
-![Language](https://img.shields.io/badge/language-JavaScript-yellow)
-![Status](https://img.shields.io/badge/status-Active-success)
+This userscript automates email verification and landing page interactions for [PlayAtMCD](https://amoe.playatmcd.com/) and adds Gmail integration for auto-verifying OTP codes.
+Script made with vibes <3
 
 ---
 
-## ✨ Overview
+## Features
 
-This userscript bridges **Gmail** and **PlayAtMCD** by automatically opening verification links and completing OTP verification for you.
+### Gmail
+- Automatically expands trimmed email content.
+- Adds a persistent **Auto-Verify Links** button to Gmail.
+- Opens PlayAtMCD verify links with OTP codes appended directly.
 
-When installed in **Tampermonkey**, the script:
+### PlayAtMCD Landing Page
+- Autofills your email once typed (stored locally in `localStorage`).
+- Checks all checkboxes automatically.
+- Attempts to click reCAPTCHA checkbox, or focuses it for manual solving.
 
-- Adds an **“Auto-Verify Links”** button in Gmail  
-- Scans your opened emails for McDonald’s Monopoly verification URLs  
-- Opens each verification link (with the OTP code appended) in new tabs  
-- Automatically pastes the 6-digit OTP and clicks **Verify & Continue** on the McDonald’s page  
-
-> “Opens the links and pastes the codes and moves you onto the information page.”  
-
----
-
-## ⚙️ Features
-
-✅ **Automatic link detection** — Finds all `https://amoe.playatmcd.com/verify_your_email` links in Gmail  
-✅ **OTP extraction** — Reads 6-digit codes directly from the email body  
-✅ **Batch opening** — Opens up to 20 verification pages at once  
-✅ **One-click Gmail button** — Floating persistent “Auto-Verify Links” button  
-✅ **Auto-fill + submit** — Pastes OTP into the PlayAtMCD page and clicks “Verify & Continue”  
-✅ **Manual fallback** — Adds “Paste OTP” button if the auto-flow doesn’t trigger  
+### PlayAtMCD Verification Page
+- Automatically pastes OTP codes from the URL hash.
+- Clicks the **Verify & Continue** button.
+- Adds a manual **Paste OTP** button as a fallback.
 
 ---
 
-## ⚠️ Disclaimer
+## Notes
 
-⚠️ Use responsibly — automating interactions may violate third-party terms of service.
-
-🧪 For educational or research purposes only.
-
-💥 “100% vibecoded” — quick-and-dirty automation; expect minor quirks.
+- The script does **not bypass or solve CAPTCHA** — it only focuses the CAPTCHA and attempts a safe click.
+- Email is stored **locally in your browser** (localStorage), not sent anywhere.
+- Works with Gmail web interface and PlayAtMCD pages.
 
 ---
 
-## 👨‍💻 Author
+## Installation
 
-Pokeeee
-GitHub: @Pokeeee
+1. Install [Tampermonkey](https://www.tampermonkey.net/) for your browser.
+2. Click the **`+`** button in Tampermonkey to create a new script.
+3. Copy the full userscript code into the editor.
+4. Save the script and ensure it is enabled.
+
+---
+
+## Usage
+
+1. **Gmail:**
+   - Open an email containing a PlayAtMCD verification link.
+   - Click the **Auto-Verify Links** button added by the script.
+   - Links will open in new tabs with OTP codes appended.
+
+2. **PlayAtMCD Landing Page:**
+   - Enter your email when prompted (saved locally for future visits).
+   - Both checkboxes will be checked automatically.
+   - reCAPTCHA will be focused (auto-click attempted if possible).
+
+3. **PlayAtMCD Verification Page:**
+   - The OTP code will be pasted automatically from the URL hash.
+   - **Verify & Continue** will be clicked automatically.
+   - Manual **Paste OTP** button is available as fallback.
+
+---
+
+## License
+
+MIT License. Free to use, modify, and share.
+
+---
+
+## Authors
+
+**Pokeeee** and **Jade**
