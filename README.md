@@ -1,4 +1,4 @@
-# PlayAtMCD + Gmail Auto-Verify Userscript
+# McDonalds Monopoly QOL Extension
 
 This userscript automates email verification and landing page interactions for AMOE McDonalds Monopoly and adds Gmail integration for auto-verifying OTP codes.
 Script made with vibes <3
