@@ -1,6 +1,6 @@
 # PlayAtMCD + Gmail Auto-Verify Userscript
 
-This userscript automates email verification and landing page interactions for [PlayAtMCD](https://amoe.playatmcd.com/) and adds Gmail integration for auto-verifying OTP codes.
+This userscript automates email verification and landing page interactions for [PlayAtMCD](https://www.amoe.playatmcd.com/) and adds Gmail integration for auto-verifying OTP codes.
 Script made with vibes <3
 
 ---
